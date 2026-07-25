@@ -1,5 +1,5 @@
 # Nimbus
-# Copyright (c) 2018-2025 Status Research & Development GmbH
+# Copyright (c) 2018-2026 Status Research & Development GmbH
 # Licensed under either of
 #  * Apache License, version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or
 #    http://www.apache.org/licenses/LICENSE-2.0)
@@ -23,7 +23,8 @@ import
   ../gas_costs,
   ../op_codes,
   ./oph_defs,
-  eth/common
+  eth/common,
+  eth/keccak/keccak
 
 # ------------------------------------------------------------------------------
 # Private, op handlers implementation
@@ -46,6 +47,8 @@ proc sha3Op(cpt: VmCpt): EvmResultVoid =
   let endRange = min(pos + len, cpt.memory.len) - 1
   if endRange == -1 or pos >= cpt.memory.len:
     cpt.stack.lsTop(EMPTY_SHA3)
+  elif len == 32:
+    cpt.stack.lsTop keccak256_32(cpt.memory.bytes.toOpenArray(pos, endRange)).to(Hash32)
   else:
     cpt.stack.lsTop keccak256 cpt.memory.bytes.toOpenArray(pos, endRange)
   ok()
